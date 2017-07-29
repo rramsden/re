@@ -1,13 +1,16 @@
 # RickEdit
 
-> A C++11 project
+> My personal text-editor
 
 ## ⚙️ Build Setup
 
 ```
-# build re binary
+# Generate a Makefile
+cmake .
+
+# Build the project
 make
 
-# open a file
-./re <filename>
+# Run it
+./bin/re
 ```
