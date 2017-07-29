@@ -7,6 +7,8 @@
 #include <sys/ioctl.h>
 #include <iostream>
 
+#include "vendor/fmt/fmt/format.h"
+
 using namespace std;
 
 #define RE_VERSION "0.0.1"
@@ -113,11 +115,7 @@ void editorDrawRows(string &sbuf) {
   int y;
   for (y = 0; y < E.screenrows; y++) {
     if (y == E.screenrows - 1) {
-      char welcome[80];
-      int welcomelen = snprintf(welcome, sizeof(welcome),
-          "RickEdit -- version %s", RE_VERSION);
-      if (welcomelen > E.screencols) welcomelen = E.screencols;
-
+      string welcome = fmt::format("RickEdit -- version {}", RE_VERSION);
       sbuf += welcome;
     } else {
       sbuf += "~";

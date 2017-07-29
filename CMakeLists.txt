@@ -6,6 +6,13 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/bin)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
+
+add_subdirectory(vendor/fmt EXCLUDE_FROM_ALL)
+
 include_directories("${PROJECT_SOURCE_DIR}")
 
-add_executable(re ${PROJECT_SOURCE_DIR}/re.cpp)
+add_executable(re
+    ${PROJECT_SOURCE_DIR}/re.cpp
+)
+
+target_link_libraries(re PRIVATE fmt::fmt-header-only)
