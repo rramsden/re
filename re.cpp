@@ -5,7 +5,10 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <sys/ioctl.h>
+#include <sys/types.h>
 #include <iostream>
+#include <fstream>
+#include <vector>
 
 #include "vendor/fmt/fmt/format.h"
 
@@ -18,6 +21,9 @@ struct editorConfig {
   int cx, cy;
   int screenrows;
   int screencols;
+  int numrows;
+  int rowoff;
+  vector<string> erows;
   struct termios orig_termios;
 };
 
@@ -63,6 +69,23 @@ void enableRawMode() {
   raw.c_cc[VTIME] = 1;
 
   if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1) die("tcsetattr");
+}
+
+void editorAppendRow(string line) {
+  E.erows.push_back(line);
+  E.numrows++;
+}
+
+void editorOpen(char *filename) {
+  ifstream input(filename);
+  if (!input) die("ifstream");
+  string line;
+
+  while (getline(input, line)) {
+    editorAppendRow(line);
+  }
+
+  input.close();
 }
 
 int editorReadKey() {
@@ -126,7 +149,7 @@ void editorMoveCursor(char key) {
         E.cx++;
       break;
     case ARROW_DOWN:
-      if (E.cy != E.screenrows - 1)
+      if (E.cy < E.numrows)
         E.cy++;
       break;
     case ARROW_UP:
@@ -171,6 +194,8 @@ int getWindowSize(int *rows, int *cols) {
 void initEditor() {
   E.cx = 0;
   E.cy = 0;
+  E.rowoff = 0;
+  E.numrows = 0;
 
   if (getWindowSize(&E.screenrows, &E.screencols) == -1) die("getWindowSize");
 }
@@ -211,20 +236,39 @@ void editorProcessKeypress() {
   }
 }
 
+void editorScroll() {
+  if (E.cy < E.rowoff) {
+    E.rowoff = E.cy;
+  }
+
+  if (E.cy >= E.rowoff + E.screenrows) {
+    E.rowoff = E.cy - E.screenrows + 1;
+  }
+}
+
 void editorDrawRows(string &sbuf) {
-  int y;
-  for (y = 0; y < E.screenrows; y++) {
-    if (y == (E.screenrows / 2)) {
-      string welcome = fmt::format("RickEdit -- version {}", RE_VERSION);
-      int padding = ((E.screencols - welcome.size()) / 2);
-      if (padding) {
+  for (int y = 0; y < E.screenrows; y++) {
+    int filerow = y + E.rowoff;
+
+    if (filerow >= E.numrows) {
+      // Only display welcome message when there is no file
+      if (E.numrows == 0 && y == (E.screenrows / 2)) {
+        string welcome = fmt::format("RickEdit -- version {}", RE_VERSION);
+        int padding = ((E.screencols - welcome.size()) / 2);
+        if (padding) {
+          sbuf += "~";
+          padding--;
+        }
+        while (padding--) sbuf += " ";
+
+        sbuf += welcome;
+      } else {
         sbuf += "~";
       }
-      while (padding--) sbuf += " ";
-
-      sbuf += welcome;
     } else {
-      sbuf += "~";
+      int len = E.erows[filerow].size();
+      if (len > E.screencols) len = E.screencols;
+      sbuf += E.erows[filerow];
     }
 
     sbuf += "\x1b[K"; // erase in line
@@ -236,6 +280,7 @@ void editorDrawRows(string &sbuf) {
 }
 
 void editorRefreshScreen() {
+  editorScroll();
   string sbuf = "";
 
   sbuf += "\x1b[?25l"; // hide cursor
@@ -244,16 +289,20 @@ void editorRefreshScreen() {
   editorDrawRows(sbuf);
 
   // position the cursor
-  sbuf += fmt::format("\x1b[{};{}H", E.cy + 1, E.cx + 1);
+  sbuf += fmt::format("\x1b[{};{}H", E.cy - E.rowoff, E.cx + 1);
 
   sbuf += "\x1b[?25h"; // show cursor
 
   write(STDOUT_FILENO, sbuf.c_str(), sbuf.size());
 }
 
-int main() {
+int main(int argc, char *argv[]) {
   enableRawMode();
   initEditor();
+
+  if (argc >= 2) {
+    editorOpen(argv[1]);
+  }
 
   while(1) {
     editorRefreshScreen();
