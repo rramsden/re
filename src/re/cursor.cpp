@@ -27,6 +27,6 @@ void Cursor::right() {
     cx++;
 }
 
-Cursor Cursor::move(int c_x, int c_y, int clamp_x, int clamp_y) {
-  return Cursor(c_x, c_y, clamp_x, clamp_y);
+std::unique_ptr<Cursor> Cursor::move(int c_x, int c_y, int clamp_x, int clamp_y) {
+  return std::make_unique<Cursor>(c_x, c_y, clamp_x, clamp_y);
 }

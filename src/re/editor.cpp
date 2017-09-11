@@ -2,13 +2,15 @@
 
 using namespace std;
 
-Editor::Editor() : cursor(0,0,0,0) {
+Editor::Editor() {
   rowoff = 0;
   coloff = 0;
   numrows = 0;
 
   terminal.enableRawMode();
   if (terminal.getWindowSize(&screenrows, &screencols) == -1) throw("getWindowSize");
+
+  cursor = make_unique<Cursor>(0, 0, screenrows, screencols);
 }
 
 void Editor::open(char *filename) {
@@ -84,11 +86,11 @@ void Editor::processKeypress() {
       break;
       
     case HOME_KEY:
-      cursor = Cursor::move(0, cursor.cy, cursor.clampx, cursor.clampy);
+      cursor = Cursor::move(0, cursor->cy, cursor->clampx, cursor->clampy);
       break;
 
     case END_KEY:
-      cursor.cx = screencols - 1;
+      cursor->cx = screencols - 1;
       break;
 
     case PAGE_UP:
@@ -110,12 +112,12 @@ void Editor::processKeypress() {
 }
 
 void Editor::scroll() {
-  if (cursor.cy < rowoff) {
-    rowoff = cursor.cy;
+  if (cursor->cy < rowoff) {
+    rowoff = cursor->cy;
   }
 
-  if (cursor.cy >= rowoff + screenrows) {
-    rowoff = cursor.cy - screenrows + 1;
+  if (cursor->cy >= rowoff + screenrows) {
+    rowoff = cursor->cy - screenrows + 1;
   }
 }
 
@@ -161,7 +163,7 @@ void Editor::refresh() {
 
   draw_rows(sbuf);
 
-  sbuf += ANSI::set_cursor(cursor.cy - rowoff, cursor.cx);
+  sbuf += ANSI::set_cursor(cursor->cy - rowoff, cursor->cx);
   sbuf += ANSI::show_cursor();
 
   write(STDOUT_FILENO, sbuf.c_str(), sbuf.size());
@@ -170,16 +172,16 @@ void Editor::refresh() {
 void Editor::move(char key) {
   switch(key) {
     case ARROW_LEFT:
-      cursor.left();
+      cursor->left();
       break;
     case ARROW_RIGHT:
-      cursor.right();
+      cursor->right();
       break;
     case ARROW_DOWN:
-      cursor.down();
+      cursor->down();
       break;
     case ARROW_UP:
-      cursor.up();
+      cursor->up();
       break;
   }
 }

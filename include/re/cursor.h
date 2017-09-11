@@ -1,5 +1,7 @@
-#ifndef CURSOR_H
-#define CURSOR_H
+#pragma once
+
+#include <string>
+#include <memory>
 
 class Cursor {
   public:
@@ -14,7 +16,5 @@ class Cursor {
     void left();
     void right();
 
-    static Cursor move(int c_x, int c_y, int clamp_x, int clamp_y);
+    static std::unique_ptr<Cursor> move(int c_x, int c_y, int clamp_x, int clamp_y);
 };
-
-#endif

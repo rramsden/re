@@ -35,7 +35,7 @@ class Editor {
     int coloff;
     int cx, cy;
     int numrows;
-    Cursor cursor;
+    std::unique_ptr<Cursor> cursor;
     vector<string> erows;
     Terminal terminal;
 
