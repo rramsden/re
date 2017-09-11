@@ -11,8 +11,13 @@ add_subdirectory(vendor/fmt EXCLUDE_FROM_ALL)
 
 include_directories("${PROJECT_SOURCE_DIR}")
 
+file(GLOB SOURCES
+    ./*.h
+    ./*.cpp
+)
+
 add_executable(re
-    ${PROJECT_SOURCE_DIR}/re.cpp
+    ${SOURCES}
 )
 
 target_link_libraries(re PRIVATE fmt::fmt-header-only)
