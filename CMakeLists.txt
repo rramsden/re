@@ -9,15 +9,13 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
 add_subdirectory(vendor/fmt EXCLUDE_FROM_ALL)
 
-include_directories("${PROJECT_SOURCE_DIR}")
+# Include headers
+include_directories (include)
+include_directories ("vendor/fmt")
 
-file(GLOB SOURCES
-    ./*.h
-    ./*.cpp
-)
+# Source codes (except main.cpp)
+file (GLOB_RECURSE SOURCES "src/*.cpp")
 
-add_executable(re
-    ${SOURCES}
-)
+add_executable(re ${SOURCES})
 
 target_link_libraries(re PRIVATE fmt::fmt-header-only)

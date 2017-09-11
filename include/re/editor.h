@@ -11,7 +11,7 @@
 #include "ansi.h"
 #include "terminal.h"
 #include "cursor.h"
-#include "vendor/fmt/fmt/format.h"
+#include "fmt/format.h"
 
 #define RE_VERSION "0.0.1"
 

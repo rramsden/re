@@ -1,7 +1,7 @@
 #ifndef ANSI_H
 #define ANSI_H
 
-#include "vendor/fmt/fmt/format.h"
+#include "fmt/format.h"
 
 #define CTRL_KEY(k) ((k) & 0x1f)
 

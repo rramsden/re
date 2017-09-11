@@ -1,4 +1,4 @@
-#include "terminal.h"
+#include "re/terminal.h"
 
 struct termios orig_termios;
 

@@ -1,4 +1,4 @@
-#include "editor.h"
+#include "re/editor.h"
 
 int main(int argc, char *argv[]) {
   Editor editor;

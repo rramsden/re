@@ -1,4 +1,4 @@
-#include "cursor.h"
+#include "re/cursor.h"
 
 Cursor::Cursor(int c_x, int c_y, int clamp_x, int clamp_y) {
   cx = c_x;
