@@ -123,6 +123,7 @@ void Editor::scroll() {
 void Editor::draw_rows(string &sbuf) {
   for (int y = 0; y < screenrows; y++) {
     int filerow = y + rowoff;
+    int filecol = 0;
 
     if (filerow >= numrows) {
       // Only display welcome message when there is no file
@@ -142,7 +143,7 @@ void Editor::draw_rows(string &sbuf) {
     } else {
       int len = erows[filerow].size();
       if (len > screencols) len = screencols;
-      sbuf += erows[filerow];
+      sbuf += erows[filerow].substr(filecol, len);
     }
 
     sbuf += ANSI::erase_line();
