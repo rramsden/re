@@ -52,6 +52,6 @@ class Editor {
   private:
     void scroll();
     void draw_rows(string &sbuf);
-    string getStatusLine();
+    string get_status_line();
     int readKey();
 };

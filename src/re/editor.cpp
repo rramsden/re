@@ -26,6 +26,9 @@ void Editor::open(char *filename) {
     append(line);
   }
 
+  // set maximum cursor scroll
+  cursor->clampy = erows.size();
+
   input.close();
 }
 
@@ -124,7 +127,7 @@ void Editor::scroll() {
   }
 }
 
-string Editor::getStatusLine() {
+string Editor::get_status_line() {
   string str = fmt::format("{}: {}", cursor->cy, cursor->cx);
   int len = str.size();
 
@@ -141,7 +144,7 @@ void Editor::draw_rows(string &sbuf) {
     int filecol = 0;
 
     if (y == screenrows - 1) {
-      sbuf += getStatusLine();
+      sbuf += get_status_line();
     } else if (filerow >= numrows) {
       // Only display welcome message when there is no file
       if (numrows == 0 && y == (screenrows / 2)) {
@@ -180,7 +183,7 @@ void Editor::refresh() {
 
   draw_rows(sbuf);
 
-  sbuf += ANSI::set_cursor(cursor->cy - rowoff, cursor->cx);
+  sbuf += ANSI::set_cursor(cursor->cy - rowoff - 1, cursor->cx);
   sbuf += ANSI::show_cursor();
 
   write(STDOUT_FILENO, sbuf.c_str(), sbuf.size());
