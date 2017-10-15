@@ -38,7 +38,7 @@ class Editor {
     int coloff;
     int cx, cy;
     int numrows;
-    std::unique_ptr<Cursor> cursor;
+    unique_ptr<Cursor> cursor;
     vector<string> erows;
     Terminal terminal;
 
@@ -52,5 +52,6 @@ class Editor {
   private:
     void scroll();
     void draw_rows(string &sbuf);
+    string getStatusLine();
     int readKey();
 };

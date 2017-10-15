@@ -124,12 +124,25 @@ void Editor::scroll() {
   }
 }
 
+string Editor::getStatusLine() {
+  string str = fmt::format("{}: {}", cursor->cy, cursor->cx);
+  int len = str.size();
+
+  for (int i = 0; i < screencols - len; ++i) {
+    str += " ";
+  }
+
+  return "\e[100m" + str + "\e[49m";
+}
+
 void Editor::draw_rows(string &sbuf) {
   for (int y = 0; y < screenrows; y++) {
     int filerow = y + rowoff;
     int filecol = 0;
 
-    if (filerow >= numrows) {
+    if (y == screenrows - 1) {
+      sbuf += getStatusLine();
+    } else if (filerow >= numrows) {
       // Only display welcome message when there is no file
       if (numrows == 0 && y == (screenrows / 2)) {
         string welcome = fmt::format("RickEdit -- version {}", RE_VERSION);
