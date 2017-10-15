@@ -3,8 +3,7 @@
 struct termios orig_termios;
 
 void disableRawMode() {
-  if (tcsetattr(STDIN_FILENO, TCSANOW, &orig_termios) == -1)
-  throw "tcsetattr";
+  if (tcsetattr(STDIN_FILENO, TCSANOW, &orig_termios) == -1) throw "tcsetattr";
 }
 
 void Terminal::enableRawMode() {

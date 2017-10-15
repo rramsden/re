@@ -14,9 +14,13 @@ Editor::Editor() {
 }
 
 void Editor::open(char *filename) {
-  ifstream input(filename);
-  if (!input) throw("ifstream");
   string line;
+
+  ifstream input(filename);
+  if (!input) {
+    perror("ifstream");
+    exit(errno);
+  }
 
   while (getline(input, line)) {
     append(line);
