@@ -14,6 +14,9 @@
 #include "fmt/format.h"
 
 #define RE_VERSION "0.0.1"
+#define CTRL_KEY(k) ((k) & 0x1f)
+
+using namespace std;
 
 class Editor {
   enum editorKey {

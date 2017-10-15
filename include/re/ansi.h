@@ -1,9 +1,5 @@
-#ifndef ANSI_H
-#define ANSI_H
-
+#pragma once
 #include "fmt/format.h"
-
-#define CTRL_KEY(k) ((k) & 0x1f)
 
 using namespace std;
 
@@ -27,8 +23,5 @@ class ANSI {
 
     static string erase_line() {
       return "\x1b[K";
-
     }
 };
-
-#endif
