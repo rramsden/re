@@ -84,7 +84,6 @@ void Editor::processKeypress() {
       write(STDOUT_FILENO, "\x1b[H", 3);
       exit(0);
       break;
-      
     case HOME_KEY:
       cursor = Cursor::move(0, cursor->cy, cursor->clampx, cursor->clampy);
       break;
