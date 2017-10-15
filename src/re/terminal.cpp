@@ -3,25 +3,26 @@
 struct termios orig_termios;
 
 void disableRawMode() {
-  if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios) == -1)
+  if (tcsetattr(STDIN_FILENO, TCSANOW, &orig_termios) == -1)
   throw "tcsetattr";
 }
 
 void Terminal::enableRawMode() {
-  struct termios raw = orig_termios;
+  struct termios tattr;
 
-  tcgetattr(STDIN_FILENO, &raw);
-
+  // Save terminal attributes so we can restore them later
+  tcgetattr(STDIN_FILENO, &orig_termios);
   atexit(disableRawMode);
 
-  raw.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
-  raw.c_oflag &= ~(OPOST);
-  raw.c_cflag &= ~(CS8);
-  raw.c_lflag &= ~(ECHO | ICANON | ISIG | IEXTEN);
-  raw.c_cc[VMIN] = 0;
-  raw.c_cc[VTIME] = 1;
+  // Set custom terminal attributes
+  tattr.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
+  tattr.c_oflag &= ~(OPOST);
+  tattr.c_cflag &= ~(CS8);
+  tattr.c_lflag &= ~(ECHO | ICANON | ISIG | IEXTEN);
+  tattr.c_cc[VMIN] = 0;
+  tattr.c_cc[VTIME] = 1;
 
-  if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1) throw "tcsetattr";
+  if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &tattr) == -1) throw "tcsetattr";
 }
 
 int Terminal::getCursorPosition(int *rows, int *cols) {
