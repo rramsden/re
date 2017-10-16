@@ -10,13 +10,15 @@ Editor::Editor() {
   terminal.enableRawMode();
   if (terminal.getWindowSize(&screenrows, &screencols) == -1) throw("getWindowSize");
 
+  screenrows -= 1; // statusbar
   cursor = make_unique<Cursor>(0, 0, screenrows, screencols);
 }
 
-void Editor::open(char *filename) {
+void Editor::open(char *fname) {
   string line;
+  filename = fname;
 
-  ifstream input(filename);
+  ifstream input(fname);
   if (!input) {
     perror("ifstream");
     exit(errno);
@@ -118,24 +120,21 @@ void Editor::processKeypress() {
 }
 
 void Editor::scroll() {
+  // vertical scrolling
   if (cursor->cy < rowoff) {
     rowoff = cursor->cy;
   }
-
   if (cursor->cy >= rowoff + screenrows) {
     rowoff = cursor->cy - screenrows + 1;
   }
-}
 
-string Editor::get_status_line() {
-  string str = fmt::format("{}: {}", cursor->cy, cursor->cx);
-  int len = str.size();
-
-  for (int i = 0; i < screencols - len; ++i) {
-    str += " ";
+  // horizontal scrolling
+  if (cursor->cx < coloff) {
+    coloff = cursor->cx;
   }
-
-  return "\e[100m" + str + "\e[49m";
+  if (cursor->cx >= coloff + screencols) {
+    coloff = cursor->cx - screencols + 1;
+  }
 }
 
 void Editor::draw_rows(string &sbuf) {
@@ -143,9 +142,7 @@ void Editor::draw_rows(string &sbuf) {
     int filerow = y + rowoff;
     int filecol = 0;
 
-    if (y == screenrows - 1) {
-      sbuf += get_status_line();
-    } else if (filerow >= numrows) {
+    if (filerow >= numrows) {
       // Only display welcome message when there is no file
       if (numrows == 0 && y == (screenrows / 2)) {
         string welcome = fmt::format("RickEdit -- version {}", RE_VERSION);
@@ -161,17 +158,28 @@ void Editor::draw_rows(string &sbuf) {
         sbuf += "~";
       }
     } else {
-      int len = erows[filerow].size();
-      if (len > screencols) len = screencols;
-      sbuf += erows[filerow].substr(filecol, len);
+      int len = erows[filerow].size() - coloff;
+      if (len < 0) {
+        sbuf += "";
+      } else {
+        sbuf += erows[filerow].substr(coloff, screencols);
+      }
     }
 
     sbuf += ANSI::erase_line();
-
-    if (y < screenrows - 1) {
-      sbuf += "\r\n";
-    }
+    sbuf += "\r\n";
   }
+}
+
+void Editor::draw_status_bar(string &sbuf) {
+  string str = fmt::format("{} ({}:{})", filename, cursor->cy, cursor->cx);
+  int len = str.size();
+
+  for (int i = 0; i < screencols - len; ++i) {
+    str += " ";
+  }
+
+  sbuf += "\e[100m" + str + "\e[49m";
 }
 
 void Editor::refresh() {
@@ -182,14 +190,17 @@ void Editor::refresh() {
   sbuf += ANSI::set_cursor(0, 0);
 
   draw_rows(sbuf);
+  draw_status_bar(sbuf);
 
-  sbuf += ANSI::set_cursor(cursor->cy - rowoff - 1, cursor->cx);
+  sbuf += ANSI::set_cursor(cursor->cy - rowoff, cursor->cx - coloff);
   sbuf += ANSI::show_cursor();
 
   write(STDOUT_FILENO, sbuf.c_str(), sbuf.size());
 }
 
 void Editor::move(char key) {
+  cursor->clampx = erows[cursor->cy].size();
+
   switch(key) {
     case ARROW_LEFT:
       cursor->left();
