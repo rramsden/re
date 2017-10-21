@@ -6,6 +6,7 @@ Editor::Editor() {
   rowoff = 0;
   coloff = 0;
   numrows = 0;
+  filename = "";
 
   terminal.enableRawMode();
   if (terminal.getWindowSize(&screenrows, &screencols) == -1) throw("getWindowSize");
@@ -172,7 +173,7 @@ void Editor::draw_rows(string &sbuf) {
 }
 
 void Editor::draw_status_bar(string &sbuf) {
-  string str = fmt::format("{} ({}:{})", filename, cursor->cy, cursor->cx);
+  string str = fmt::format("{} ({}:{})", (filename != "" ? filename : "[No Name]"), cursor->cy, cursor->cx);
   int len = str.size();
 
   for (int i = 0; i < screencols - len; ++i) {
